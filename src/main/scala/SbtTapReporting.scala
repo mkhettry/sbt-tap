@@ -1,16 +1,11 @@
-package sbttap
-
 import sbt._
 import org.scalatools.testing.{Event => TEvent, Result => TResult}
 
-import Keys._
 import java.util.concurrent.atomic.AtomicInteger
 import java.io.{File, FileWriter}
 
 object SbtTapReporting extends Plugin {
-  override def settings = Seq(
-    testListeners ++= Seq(new SbtTapListener)
-  )
+  lazy val tapListener = new SbtTapListener
 }
 
 /**
