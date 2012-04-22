@@ -5,8 +5,7 @@ import org.scalatools.testing.{Event => TEvent, Result => TResult}
 
 import Keys._
 import java.util.concurrent.atomic.AtomicInteger
-import io.Source
-import java.io.{File, FileWriter, PrintWriter, StringWriter}
+import java.io.{File, FileWriter}
 
 object SbtTapReporting extends Plugin {
   override def settings = Seq(
