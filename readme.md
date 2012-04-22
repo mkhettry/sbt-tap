@@ -1,6 +1,6 @@
 Provides reporting of test success and failure for tests run by
 [simple build tool](https://github.com/harrah/xsbt)
-in a [TAP](http://en.wikipedia.org/wiki/Test_Anything_Protocol)format
+in [TAP](http://en.wikipedia.org/wiki/Test_Anything_Protocol) format
 
 All the test results will be generated in one file: test-results/test.tap
 
