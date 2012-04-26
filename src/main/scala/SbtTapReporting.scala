@@ -37,7 +37,7 @@ class SbtTapListener extends TestsListener {
           writeTapFields(stackTraceForError(e.error()))
         case TResult.Skipped =>
           // it doesn't look like this framework distinguishes between pending and ignored.
-          writeTapFields("ok", testId.incrementAndGet(), e.testName(), "#", "skip")
+          writeTapFields("ok", testId.incrementAndGet(), e.testName(), "#", "skip", e.testName())
       }
     }
   }
