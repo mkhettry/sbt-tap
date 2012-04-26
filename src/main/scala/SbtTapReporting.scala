@@ -34,7 +34,10 @@ class SbtTapListener extends TestsListener {
         case TResult.Success => writeTapFields("ok", testId.incrementAndGet(), "-", e.testName())
         case TResult.Error | TResult.Failure =>
           writeTapFields("not ok", testId.incrementAndGet(), "-", e.testName())
-          writeTapFields(stackTraceForError(e.error()))
+          // According to the TAP spec, as long as there is any kind of whitespace, this output should belong to the
+          // the test that failed and it should get displayed in the UI.
+          // TODO:It would be nice if we could report the exact line in the test where this happened.
+          writeTapFields(" ", stackTraceForError(e.error()))
         case TResult.Skipped =>
           // it doesn't look like this framework distinguishes between pending and ignored.
           writeTapFields("ok", testId.incrementAndGet(), e.testName(), "#", "skip", e.testName())
