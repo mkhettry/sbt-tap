@@ -1,6 +1,6 @@
 sbtPlugin := true
 
-name := "sbt-tap-plugin2"
+name := "sbt-tap-plugin"
 
 version := "0.1"
 
