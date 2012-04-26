@@ -21,7 +21,6 @@ class SbtTapListener extends TestsListener {
   var fileWriter: FileWriter = _
 
   override def doInit {
-    println("doInit called in sbt tap plugin")
     new File("test-results").mkdirs()
 
     fileWriter = new FileWriter("test-results/test.tap")
