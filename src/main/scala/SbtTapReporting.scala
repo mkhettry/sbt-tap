@@ -1,8 +1,8 @@
+import java.io.{PrintWriter, StringWriter, File, FileWriter}
 import sbt._
 import org.scalatools.testing.{Event => TEvent, Result => TResult}
 
 import java.util.concurrent.atomic.AtomicInteger
-import java.io.{File, FileWriter}
 
 object SbtTapReporting extends Plugin {
   lazy val tapListener = new SbtTapListener
@@ -34,10 +34,10 @@ class SbtTapListener extends TestsListener {
         case TResult.Success => writeTapFields("ok", testId.incrementAndGet(), "-", e.testName())
         case TResult.Error | TResult.Failure =>
           writeTapFields("not ok", testId.incrementAndGet(), "-", e.testName())
-          // TODO: for exceptions, write stack trace to tap file.
+          writeTapFields(stackTraceForError(e.error()))
         case TResult.Skipped =>
           // it doesn't look like this framework distinguishes between pending and ignored.
-          writeTapFields("ok", testId.incrementAndGet(), "#", "skip", e.testName())
+          writeTapFields("ok", testId.incrementAndGet(), e.testName(), "#", "skip")
       }
     }
   }
@@ -49,6 +49,12 @@ class SbtTapListener extends TestsListener {
 
   private def writeTapFields(s: Any*) { fileWriter.write(s.mkString("",  " ", "\n")) }
 
+  private def stackTraceForError(t: Throwable): String = {
+    val sw = new StringWriter()
+    val printWriter = new PrintWriter(sw)
+    t.printStackTrace(printWriter)
+    sw.toString
+  }
   def endGroup(name: String, t: Throwable) { }
 
   def endGroup(name: String, result: TestResult.Value) { }
