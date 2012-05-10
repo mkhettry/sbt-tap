@@ -5,7 +5,7 @@ import org.scalatools.testing.{Event => TEvent, Result => TResult}
 import java.util.concurrent.atomic.AtomicInteger
 
 object SbtTapReporting extends Plugin {
-  lazy val tapListener = new SbtTapListener
+  def apply() = new SbtTapListener
 }
 
 /**
