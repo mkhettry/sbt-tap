@@ -1,6 +1,6 @@
-import java.io.{PrintWriter, StringWriter, File, FileWriter}
+import java.io.{PrintWriter, StringWriter, FileWriter}
 import sbt._
-import org.scalatools.testing.{Event => TEvent, Result => TResult}
+import sbt.testing.{Event => TEvent, Status => TStatus, OptionalThrowable}
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -30,17 +30,21 @@ class SbtTapListener extends TestsListener {
 
   def testEvent(event: TestEvent) {
     event.detail.foreach { e: TEvent =>
-      e.result match {
-        case TResult.Success => writeTapFields("ok", testId.incrementAndGet(), "-", e.testName())
-        case TResult.Error | TResult.Failure =>
-          writeTapFields("not ok", testId.incrementAndGet(), "-", e.testName())
+      e.status match {
+        case TStatus.Success => writeTapFields("ok", testId.incrementAndGet(), "-", e.fullyQualifiedName())
+        case TStatus.Error | TStatus.Failure =>
+          writeTapFields("not ok", testId.incrementAndGet(), "-", e.fullyQualifiedName())
           // According to the TAP spec, as long as there is any kind of whitespace, this output should belong to the
           // the test that failed and it should get displayed in the UI.
           // TODO:It would be nice if we could report the exact line in the test where this happened.
-          writeTapFields(" ", stackTraceForError(e.error()))
-        case TResult.Skipped =>
+          writeTapFields(" ", stackTraceForError(e.throwable()))
+        case TStatus.Skipped | TStatus.Ignored | TStatus.Canceled =>
           // it doesn't look like this framework distinguishes between pending and ignored.
-          writeTapFields("ok", testId.incrementAndGet(), e.testName(), "#", "skip", e.testName())
+          writeTapFields("ok", testId.incrementAndGet(), e.fullyQualifiedName(), "#", "skip", e.fullyQualifiedName())
+        case TStatus.Pending =>
+          // it doesn't look like this framework distinguishes between pending and ignored.
+          writeTapFields("not ok", testId.incrementAndGet(), e.fullyQualifiedName(), "#", "TODO", e.fullyQualifiedName())
+
       }
     }
   }
@@ -52,11 +56,15 @@ class SbtTapListener extends TestsListener {
 
   private def writeTapFields(s: Any*) { fileWriter.write(s.mkString("",  " ", "\n")) }
 
-  private def stackTraceForError(t: Throwable): String = {
-    val sw = new StringWriter()
-    val printWriter = new PrintWriter(sw)
-    t.printStackTrace(printWriter)
-    sw.toString
+  private def stackTraceForError(t: OptionalThrowable): String = {
+    if(!t.isEmpty) {
+      val sw = new StringWriter()
+      val printWriter = new PrintWriter(sw)
+      t.get.printStackTrace(printWriter)
+      sw.toString
+    } else {
+      ""
+    }
   }
   def endGroup(name: String, t: Throwable) { }
 
